@@ -81,6 +81,43 @@ pub struct AddLiquidity<'info>{
     pub token_program  : Program<'info , Token>
 }
 
+#[derive(Accounts)]
+pub struct  RemoveLiquidity <'info>{
+    pub user  :Signer<'info>,
+
+    #[account(mut , associated_token::mint = token_a_mint , associated_token::authority = user)]
+    pub user_token_a_ata : Account<'info , TokenAccount>,
+    #[account(mut , associated_token::mint = token_b_mint , associated_token::authority = user)]
+    pub user_token_b_ata : Account<'info , TokenAccount>,
+    #[account(mut , associated_token::mint = lp_mint , associated_token::authority = user)]
+    pub user_lp_ata : Account<'info , TokenAccount>,
+
+    #[account(mut , seeds=[b"pool",
+        token_a_mint.key().as_ref(),
+        token_b_mint.key().as_ref()],
+        bump, has_one = authority)]
+    pub pool_account: Account<'info, Pool>,
+
+    #[account(seeds = [b"authority", pool_account.key().as_ref()], bump )]
+    ///CHECK : pda for signing
+    pub authority : UncheckedAccount<'info>,
+
+    #[account(mut ,associated_token::mint = token_a_mint , associated_token::authority = authority)]
+    pub token_a_vault_ata : Account<'info , TokenAccount>,
+
+    #[account(mut ,associated_token::mint = token_b_mint , associated_token::authority = authority)]
+    pub token_b_vault_ata : Account<'info , TokenAccount>,
+
+
+    #[account(mut , seeds=[b"mint", pool_account.key().as_ref()],bump)]
+    pub lp_mint: Account<'info, Mint>,
+    pub token_a_mint : Account<'info , Mint>,
+    pub token_b_mint : Account<'info , Mint>,
+    
+    pub token_program : Program<'info , Token>
+}
+
+
 #[account]
 pub struct Pool{
     pub lp_mint : Pubkey,
@@ -89,7 +126,7 @@ pub struct Pool{
     pub token_b_mint : Pubkey , 
     pub token_a_vault_ata : Pubkey , 
     pub token_b_vault_ata : Pubkey , 
-   // PDA Authority for lp mint, both vault ata 
+    // PDA Authority for lp mint, both vault ata 
     pub authority  : Pubkey,  
     pub bump  : u8,
     pub fee_rate : u8, 
