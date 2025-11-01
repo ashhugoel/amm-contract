@@ -99,7 +99,7 @@ describe("amm", () => {
   
 
   it("Swap AMM", async () => {
-    console.log("-".repeat(10));
+    console.log("-".repeat(80));
     const tx = await program.methods.swap( true, new anchor.BN(50_000_000)).accounts({
       // user: provider.publicKey.toBase58(),
       tokenAMint: token_a_mint.toBase58(),
@@ -119,7 +119,7 @@ describe("amm", () => {
   });
 
   it("Removing LP!", async () => {
-    console.log("-".repeat(150));
+    console.log("-".repeat(80));
     const tx = await program.methods.removeLiquidity(new anchor.BN(158_113_883)).accounts({
       // user: provider.publicKey.toBase58(),
       tokenAMint: token_a_mint.toBase58(),
