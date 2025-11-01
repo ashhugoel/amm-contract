@@ -118,6 +118,40 @@ pub struct  RemoveLiquidity <'info>{
 }
 
 
+#[derive(Accounts)]
+pub struct  Swap <'info>{
+    pub user  :Signer<'info>,
+
+    #[account(mut , associated_token::mint = token_a_mint , associated_token::authority = user)]
+    pub user_token_a_ata : Account<'info , TokenAccount>,
+    #[account(mut , associated_token::mint = token_b_mint , associated_token::authority = user)]
+    pub user_token_b_ata : Account<'info , TokenAccount>,
+
+
+    #[account(seeds=[b"pool",
+        token_a_mint.key().as_ref(),
+        token_b_mint.key().as_ref()],
+        bump, has_one = authority)]
+    pub pool_account: Account<'info, Pool>,
+
+    #[account(seeds = [b"authority", pool_account.key().as_ref()], bump )]
+    ///CHECK : pda for signing
+    pub authority : UncheckedAccount<'info>,
+
+    #[account(mut ,associated_token::mint = token_a_mint , associated_token::authority = authority)]
+    pub token_a_vault_ata : Account<'info , TokenAccount>,
+
+    #[account(mut ,associated_token::mint = token_b_mint , associated_token::authority = authority)]
+    pub token_b_vault_ata : Account<'info , TokenAccount>,
+
+    pub token_a_mint : Account<'info , Mint>,
+    pub token_b_mint : Account<'info , Mint>,
+    
+    pub token_program : Program<'info , Token>
+}
+
+
+
 #[account]
 pub struct Pool{
     pub lp_mint : Pubkey,

@@ -18,9 +18,9 @@ describe("amm", () => {
   let lp_mint;
   let pool_account, bump;
 
-  let user_a_ata 
-  let user_b_ata 
-  let  user_lp_ata 
+  let user_a_ata
+  let user_b_ata
+  let user_lp_ata
 
   it("Is initialized!", async () => {
     token_a_mint = await createMint(connection, provider.wallet.payer, provider.publicKey, null, 6);
@@ -75,26 +75,16 @@ describe("amm", () => {
     )
 
     const tx = await program.methods.addLiquidity(new anchor.BN(50_000_000), new anchor.BN(500_000_000)).accounts({
-      user: provider.publicKey.toBase58(),
+      // user: provider.publicKey.toBase58(),
       //@ts-ignore
       tokenAMint: token_a_mint.toBase58(),
       tokenBMint: token_b_mint.toBase58(),
     }).rpc();
 
     let poolAccountData = await program.account.pool.fetch(pool_account);
-    // console.log("Pool liquidity (BN):", poolAccountData.totalLiquidty.toNumber());
-
-
-    // const tx2 = await program.methods.addLiquidity(new anchor.BN(600_000_000), new anchor.BN(4000_000_000)).accounts({
-    //   user: provider.publicKey.toBase58(),
-    //   //@ts-ignore
-    //   tokenAMint: token_a_mint.toBase58(),
-    //   tokenBMint: token_b_mint.toBase58(),
-    // }).rpc();
-
 
     poolAccountData = await program.account.pool.fetch(pool_account);
-    console.log("Pool liquidity (BN):", poolAccountData.totalLiquidty.toNumber());
+    console.log("Lp token liquidity (BN):", poolAccountData.totalLiquidty.toNumber());
 
     const balanceInfo1 = await connection.getTokenAccountBalance(user_a_ata);
     console.log("User A ATA Balance:", balanceInfo1.value.uiAmount);
@@ -104,23 +94,41 @@ describe("amm", () => {
 
     const balanceInfo_lp = await connection.getTokenAccountBalance(user_lp_ata);
     console.log("User lp ATA Balance:", balanceInfo_lp.value.uiAmount);
-
-
-
-
   });
 
-  it("Removing LP!", async () => {
-    console.log("-".repeat(150));
-    const tx = await program.methods.removeLiquidity(new anchor.BN(157_113_883)).accounts({
-      user: provider.publicKey.toBase58(),
+  
+
+  it("Swap AMM", async () => {
+    console.log("-".repeat(10));
+    const tx = await program.methods.swap( true, new anchor.BN(50_000_000)).accounts({
+      // user: provider.publicKey.toBase58(),
       tokenAMint: token_a_mint.toBase58(),
       tokenBMint: token_b_mint.toBase58(),
     }).rpc();
 
     let poolAccountData = await program.account.pool.fetch(pool_account);
 
-    console.log("Pool liquidity (BN):", poolAccountData.totalLiquidty.toNumber());
+    console.log("Lp token liquidity (BN):", poolAccountData.totalLiquidty.toNumber());
+
+    const balanceInfo1 = await connection.getTokenAccountBalance(user_a_ata);
+    console.log("User A ATA Balance:", balanceInfo1.value.uiAmount);
+
+    const balanceInfo = await connection.getTokenAccountBalance(user_b_ata);
+    console.log("User B ATA Balance:", balanceInfo.value.uiAmount);
+
+  });
+
+  it("Removing LP!", async () => {
+    console.log("-".repeat(150));
+    const tx = await program.methods.removeLiquidity(new anchor.BN(158_113_883)).accounts({
+      // user: provider.publicKey.toBase58(),
+      tokenAMint: token_a_mint.toBase58(),
+      tokenBMint: token_b_mint.toBase58(),
+    }).rpc();
+
+    let poolAccountData = await program.account.pool.fetch(pool_account);
+
+    console.log("Lp token liquidity (BN):", poolAccountData.totalLiquidty.toNumber());
 
     const balanceInfo1 = await connection.getTokenAccountBalance(user_a_ata);
     console.log("User A ATA Balance:", balanceInfo1.value.uiAmount);
@@ -131,4 +139,5 @@ describe("amm", () => {
     const balanceInfo_lp = await connection.getTokenAccountBalance(user_lp_ata);
     console.log("User lp ATA Balance:", balanceInfo_lp.value.uiAmount);
   });
+
 });
