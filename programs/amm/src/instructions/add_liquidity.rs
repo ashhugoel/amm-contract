@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{ token::{self, transfer,  Mint, Token, TokenAccount ,Transfer ,MintTo }};
-use crate::Pool;
+use crate::account::Pool;
+use crate::errors::MyError;
 
 #[derive(Accounts)]
 pub struct AddLiquidity<'info>{
@@ -39,6 +40,10 @@ pub struct AddLiquidity<'info>{
 
 
 pub fn addliquidity(ctx: Context<AddLiquidity>, amount_a: u64, amount_b: u64) -> Result<()> {
+   
+    require!(ctx.accounts.user_token_a_ata.amount>= amount_a , MyError::LowBalanceInUserTokenAATA);
+    require!(ctx.accounts.user_token_b_ata.amount>= amount_b , MyError::LowBalanceInUserTokenBATA);
+    
     let pool = &mut ctx.accounts.pool_account;
 
     let decimal_mint_a = ctx.accounts.token_a_mint.decimals;
@@ -77,16 +82,12 @@ pub fn addliquidity(ctx: Context<AddLiquidity>, amount_a: u64, amount_b: u64) ->
             },
         );
 
-        msg!("in if block 3 {}");
 
         transfer(
             cpi_ctx_1,
             (amount_a * 10f64.powi(decimal_mint_a as i32)) as u64,
         )?;
-        msg!(
-            "in if block 4 {}",
-            amount_a * 10f64.powi(decimal_mint_a as i32)
-        );
+       
 
         let cpi_ctx_2 = CpiContext::new(
             ctx.accounts.token_program.to_account_info(),

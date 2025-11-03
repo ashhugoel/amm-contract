@@ -74,7 +74,7 @@ describe("amm", () => {
       BigInt(1000_000000)
     )
 
-    const tx = await program.methods.addLiquidity(new anchor.BN(50_000_000), new anchor.BN(500_000_000)).accounts({
+    const tx = await program.methods.addLiquidity(new anchor.BN(500_000_000), new anchor.BN(500_000_000)).accounts({
       // user: provider.publicKey.toBase58(),
       //@ts-ignore
       tokenAMint: token_a_mint.toBase58(),
@@ -100,7 +100,7 @@ describe("amm", () => {
 
   it("Swap AMM", async () => {
     console.log("-".repeat(80));
-    const tx = await program.methods.swap( true, new anchor.BN(50_000_000)).accounts({
+    const tx = await program.methods.swap( false, new anchor.BN(50_000_000)).accounts({
       // user: provider.publicKey.toBase58(),
       tokenAMint: token_a_mint.toBase58(),
       tokenBMint: token_b_mint.toBase58(),

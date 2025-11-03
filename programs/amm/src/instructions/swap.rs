@@ -1,6 +1,7 @@
-use crate::Pool;
+use crate::account::Pool;
 use anchor_lang::prelude::*;
 use anchor_spl::token::{ transfer, Mint, Token, TokenAccount, Transfer};
+use crate::MyError;
 
 #[derive(Accounts)]
 pub struct Swap<'info> {
@@ -48,6 +49,8 @@ pub fn swapamm(ctx: Context<Swap>, is_a_to_b: bool, amount: u64) -> Result<()> {
     let signer = &[&seed[..]];
 
     if is_a_to_b {
+        require!(ctx.accounts.user_token_a_ata.amount>= amount , MyError::LowBalanceInUserTokenAATA);
+
         let amount_a = amount as f64 / 10f64.powi(decimal_mint_a as i32);
 
         let swap_amount_b = supply_b - (k / (supply_a + amount_a));
@@ -89,6 +92,8 @@ pub fn swapamm(ctx: Context<Swap>, is_a_to_b: bool, amount: u64) -> Result<()> {
             (swap_amount_b * 10f64.powi(decimal_mint_b as i32)) as u64,
         )?;
     } else {
+        require!(ctx.accounts.user_token_b_ata.amount>= amount , MyError::LowBalanceInUserTokenBATA);
+
         let amount_b = amount as f64 / 10f64.powi(decimal_mint_b as i32);
 
         let swap_amount_a = supply_a - k / (supply_b + amount_b);
